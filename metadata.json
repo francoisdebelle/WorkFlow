@@ -1,0 +1,6 @@
+{
+  "name": "StudyFlow",
+  "description": "Tableau de bord académique pour organiser vos cours, travaux pratiques, exercices et tâches avec base de données locale.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

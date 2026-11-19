@@ -1,0 +1,577 @@
+<!DOCTYPE html><html class="light" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="web_dashboard" name="shell-type">
+<title>StudyFlow - Vue par Cours</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e5ded5; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #d4c8bd; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#FBF8F3",
+            "surface": "#FFFFFF",
+            "surface-dim": "#F4EFEA",
+            "surface-container-low": "#FAF6F0",
+            "surface-container": "#F5EFE6",
+            "surface-container-high": "#EEE6DB",
+            "surface-container-highest": "#E4DACD",
+            "outline-warm": "#E8E1D9",
+            "outline-warm-strong": "#D5C9BC",
+            "on-surface": "#1C1917",
+            "on-surface-variant": "#57534E",
+            "on-surface-muted": "#78716C",
+            "primary": "#EA580C",
+            "primary-dark": "#C2410C",
+            "primary-container": "#FFEDD5",
+            "on-primary-container": "#7C2D12",
+            "secondary": "#D97706",
+            "secondary-container": "#FEF3C7",
+            "tertiary": "#10B981",
+            "tertiary-container": "#D1FAE5",
+            "on-tertiary-container": "#065F46"
+          },
+          fontFamily: {
+            sans: ["Geist", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          },
+          boxShadow: {
+            "card": "0 1px 3px rgba(44, 39, 32, 0.05), 0 1px 2px rgba(44, 39, 32, 0.03)",
+            "elevated": "0 8px 24px -4px rgba(78, 59, 42, 0.08), 0 3px 8px -2px rgba(78, 59, 42, 0.04)",
+            "popover": "0 12px 32px -4px rgba(60, 40, 20, 0.12), 0 4px 12px -2px rgba(60, 40, 20, 0.06)"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#FBF8F3] font-sans text-on-surface antialiased min-h-screen selection:bg-orange-100 selection:text-orange-900">
+<!-- Barre Latérale Gauche (Style clair et chaleureux) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#FAF6F0] border-r border-outline-warm z-50 flex flex-col justify-between p-5">
+<div class="flex flex-col gap-5">
+<!-- Logo et Identité StudyFlow -->
+<div class="flex items-center gap-3 px-1">
+<div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-orange-500/20">
+          S
+        </div>
+<div class="flex flex-col">
+<span class="font-bold text-[16px] tracking-tight text-[#1C1917]">StudyFlow</span>
+<span class="text-[11px] font-mono font-medium text-on-surface-muted uppercase tracking-wider">Poste Académique</span>
+</div>
+</div>
+<!-- Action Rapide Nouvelle Tâche -->
+<button class="flex items-center justify-center gap-2 w-full py-2.5 px-3.5 rounded-xl bg-orange-600 text-white font-medium text-sm shadow-sm hover:bg-orange-700 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[19px]">add</span>
+<span>Nouveau TP / Tâche</span>
+</button>
+<!-- Navigation Active -->
+<nav class="flex flex-col gap-1">
+<a aria-current="page" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-white text-orange-600 font-semibold shadow-sm border border-outline-warm text-sm" href="#">
+<span class="material-symbols-outlined text-[20px] text-orange-600">grid_view</span>
+<span>Vue par Cours</span>
+</a>
+</nav>
+<!-- Section Cours Actifs avec pastilles couleurs -->
+<div class="flex flex-col gap-2 pt-2">
+<div class="flex items-center justify-between px-1">
+<span class="text-[11px] font-mono font-semibold text-on-surface-muted uppercase tracking-wider">Matières Actives</span>
+<span class="text-[11px] font-mono bg-stone-200/70 text-stone-600 px-1.5 py-0.5 rounded-full font-medium" id="sidebar-course-count">5</span>
+</div>
+<div class="flex flex-col gap-0.5" id="sidebar-courses-list">
+<!-- Informatique (Orange) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/80 text-on-surface-variant hover:text-on-surface transition-all group" href="#">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#F97316] ring-2 ring-orange-100"></span>
+<span class="text-xs font-medium truncate max-w-[125px] group-hover:font-semibold">Informatique</span>
+</div>
+<span class="text-[11px] font-mono text-on-surface-muted bg-stone-100 px-1.5 py-0.5 rounded">4 TP</span>
+</a>
+<!-- Mécanique (Bleu Foncé) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/80 text-on-surface-variant hover:text-on-surface transition-all group" href="#">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#1E40AF] ring-2 ring-blue-100"></span>
+<span class="text-xs font-medium truncate max-w-[125px] group-hover:font-semibold">Mécanique mat.</span>
+</div>
+<span class="text-[11px] font-mono text-on-surface-muted bg-stone-100 px-1.5 py-0.5 rounded">2 TP</span>
+</a>
+<!-- Maths (Vert) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/80 text-on-surface-variant hover:text-on-surface transition-all group" href="#">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#10B981] ring-2 ring-emerald-100"></span>
+<span class="text-xs font-medium truncate max-w-[125px] group-hover:font-semibold">Maths appliquées</span>
+</div>
+<span class="text-[11px] font-mono text-on-surface-muted bg-stone-100 px-1.5 py-0.5 rounded">3 TP</span>
+</a>
+<!-- Électronique (Jaune) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/80 text-on-surface-variant hover:text-on-surface transition-all group" href="#">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#EAB308] ring-2 ring-amber-100"></span>
+<span class="text-xs font-medium truncate max-w-[125px] group-hover:font-semibold">Électronique</span>
+</div>
+<span class="text-[11px] font-mono text-on-surface-muted bg-stone-100 px-1.5 py-0.5 rounded">1 TP</span>
+</a>
+<!-- Physique (Rose) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/80 text-on-surface-variant hover:text-on-surface transition-all group" href="#">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#EC4899] ring-2 ring-pink-100"></span>
+<span class="text-xs font-medium truncate max-w-[125px] group-hover:font-semibold">Physique</span>
+</div>
+<span class="text-[11px] font-mono text-on-surface-muted bg-stone-100 px-1.5 py-0.5 rounded">2 TP</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Pied de barre latérale -->
+<div class="pt-4 border-t border-outline-warm flex flex-col gap-2">
+
+<div class="w-full h-1.5 rounded-full bg-stone-200 overflow-hidden">
+<div class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full" style="width: 74%;"></div>
+</div>
+</div>
+</aside>
+<!-- Contenu Principal -->
+<div class="pl-64">
+<!-- Barre Supérieure Header -->
+<header class="fixed top-0 left-64 right-0 h-16 bg-[#FBF8F3]/90 backdrop-blur-md z-40 px-8 flex items-center justify-between border-b border-outline-warm">
+<div class="flex items-center gap-4 flex-1 max-w-2xl">
+<!-- Sélecteur de Semestre -->
+
+<!-- Champ de recherche style Trello -->
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-stone-100/90 border border-stone-200/80 w-full max-w-sm text-stone-500 focus-within:text-stone-800 focus-within:bg-white focus-within:border-orange-300 focus-within:shadow-sm transition-all">
+<span class="material-symbols-outlined text-[18px]">search</span>
+<input class="bg-transparent border-0 outline-none w-full text-xs sm:text-sm text-stone-800 placeholder:text-stone-400 font-normal" placeholder="Rechercher cours, TP, livrable..." type="text">
+<kbd class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white text-stone-500 border border-stone-200 shadow-2xs">⌘K</kbd>
+</div>
+</div>
+<!-- Actions Droite & Profil Utilisateur -->
+<div class="flex items-center gap-3">
+<!-- Bouton Nouveau Cours Épinglé dans la barre -->
+
+<div class="h-6 w-[1px] bg-outline-warm mx-1"></div>
+<!-- Profil Étudiant -->
+<div class="flex items-center gap-2.5 pl-1">
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            FD
+          </div>
+<div class="hidden md:flex flex-col text-left leading-tight">
+<span class="font-semibold text-xs text-stone-900">François D.</span>
+<span class="text-[11px] text-stone-500">Sciences de l'Ingénieur</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Zone de Contenu Principal -->
+<main class="w-full pt-16 bg-[#FBF8F3] min-h-[calc(100vh-4rem)]">
+<div class="p-8 max-w-[1680px] mx-auto flex flex-col gap-6">
+<!-- Barre Supérieure de Synthèse & Progression (Teinte miel/ambre douce) -->
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FFF6E9] via-[#FFFDF9] to-[#FFF1DE] border border-[#F3E2CB] p-6 shadow-card flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-6">
+<div class="flex items-center gap-5 flex-1 min-w-[280px]">
+<!-- Jauge Circulaire Progression -->
+<div class="relative flex items-center justify-center w-16 h-16 shrink-0">
+<svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+<circle class="text-orange-100 fill-none" cx="32" cy="32" r="28" stroke="currentColor" stroke-width="5"></circle>
+<circle class="text-orange-500 fill-none transition-all duration-700 ease-out" cx="32" cy="32" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="45.7" stroke-linecap="round" stroke-width="5"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-bold text-base text-stone-900">74%</span>
+</div>
+</div>
+<!-- Résumé Statut Semestre -->
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-mono text-[11px] uppercase tracking-wider text-orange-700 font-semibold">Bilan Semestre 4</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span class="text-[11px] text-stone-500 font-medium">Session Printemps</span>
+</div>
+<h1 class="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">42 sur 57 TPs &amp; Projets validés</h1>
+<div class="flex items-center gap-4 mt-1">
+<span class="text-xs text-stone-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-emerald-600">task_alt</span> 15 livrables restants
+                </span>
+<span class="text-stone-300">•</span>
+<span class="text-xs text-stone-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-amber-600">hourglass_top</span> Prochain rendu : Vendredi 18h
+                </span>
+</div>
+</div>
+</div>
+<!-- Boutons Rapides & Modal Trigger -->
+<div class="flex items-center gap-3 shrink-0 self-end xl:self-center">
+<button class="flex items-center gap-2 py-2 px-4 rounded-xl bg-white border border-orange-200 text-orange-700 hover:bg-orange-50/70 hover:border-orange-300 font-semibold text-xs sm:text-sm shadow-xs transition-all active:scale-[0.98]" onclick="toggleCourseModal()">
+<span class="material-symbols-outlined text-[18px]">playlist_add</span>
+<span>+ Ajouter un cours</span>
+</button>
+<button class="flex items-center gap-2 py-2 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold text-xs sm:text-sm shadow-sm transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[18px]">add_task</span>
+<span>Ajouter Tâche</span>
+</button>
+</div>
+</div>
+<!-- Filtres des Matières + Pastilles Couleur + Résumé d'état -->
+<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+<!-- Filtres boutons avec pastilles couleurs identifiables -->
+<div class="flex flex-wrap items-center gap-1.5 bg-white p-1.5 rounded-xl border border-outline-warm shadow-card">
+<button class="course-filter-btn active-filter px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#FFF3E8] text-orange-700 shadow-2xs transition-all" onclick="filterCourses('all', this)">
+              Tous les cours <span class="ml-1 text-[11px] opacity-75 font-mono">4</span>
+</button>
+<button class="course-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-all flex items-center gap-2" onclick="filterCourses('info', this)">
+<span class="w-2.5 h-2.5 rounded-full bg-[#F97316]"></span>
+              Informatique
+            </button>
+<button class="course-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-all flex items-center gap-2" onclick="filterCourses('meca', this)">
+<span class="w-2.5 h-2.5 rounded-full bg-[#1E40AF]"></span>
+              Mécanique mat.
+            </button>
+<button class="course-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-all flex items-center gap-2" onclick="filterCourses('maths', this)">
+<span class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></span>
+              Mathématiques
+            </button>
+<button class="course-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-all flex items-center gap-2" onclick="filterCourses('phys', this)">
+<span class="w-2.5 h-2.5 rounded-full bg-[#EC4899]"></span>
+              Physique &amp; Élec
+            </button>
+</div>
+<!-- Badges de statut récapitulatifs globaux -->
+<div class="flex items-center gap-3 text-stone-500 font-mono text-xs self-end lg:self-center">
+<span class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-outline-warm">
+<span class="material-symbols-outlined text-[15px] text-emerald-600">check_circle</span>
+<strong class="text-stone-800">34</strong> validés
+            </span>
+<span class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-outline-warm">
+<span class="material-symbols-outlined text-[15px] text-amber-500">pending</span>
+<strong class="text-stone-800">6</strong> en cours
+            </span>
+<span class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-outline-warm">
+<span class="material-symbols-outlined text-[15px] text-stone-400">schedule</span>
+<strong class="text-stone-800">17</strong> à faire
+            </span>
+</div>
+</div>
+<!-- GRILLE DES COURS PAR MATIÈRE (Cartes blanches lumineuses & bordures douces) -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start" id="courses-container">
+<!-- COURS 1 : INFORMATIQUE & ALGORITHMES (Accent Orange) -->
+<section class="course-card rounded-2xl bg-white border border-outline-warm p-5 shadow-card flex flex-col gap-4 transition-all hover:shadow-elevated" data-course="info">
+<!-- Entête du cours -->
+<div class="flex items-center justify-between pb-3 border-b border-stone-100">
+<div class="flex items-center gap-2.5">
+<span class="w-3.5 h-3.5 rounded-full bg-[#F97316] ring-4 ring-orange-100"></span>
+<div>
+<h2 class="font-bold text-lg text-stone-900 tracking-tight">Informatique &amp; Algorithmique</h2>
+
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<span class="font-mono text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">85% validé</span>
+<span class="block text-[11px] text-stone-500 font-mono mt-0.5">6 / 7 TPs terminés</span>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors" title="Ajouter un TP dans ce cours">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+</button><button id="toggle-info-btn" onclick="toggleCourseCollapse('info')" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all" title="Replier / Déplier le cours"><span id="toggle-info-icon" class="material-symbols-outlined text-[20px] transition-transform duration-200">keyboard_arrow_up</span></button>
+</div>
+</div>
+<!-- Barre de progression -->
+<div id="course-info-body" class="flex flex-col gap-4 transition-all duration-300"><div class="w-full h-1.5 rounded-full bg-stone-100 overflow-hidden"><div class="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" style="width: 85%;"></div></div><div class="rounded-xl bg-[#FFFDF9] border border-orange-200/80 p-4.5 flex flex-col gap-3.5 shadow-sm relative overflow-hidden"><div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#F97316]"></div><div class="flex items-start justify-between gap-3 pl-1"><div class="flex flex-col gap-1"><div class="flex items-center gap-2"><span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-orange-100 text-orange-800">TP 5 • Rendu Vendredi</span><span class="text-[11px] text-stone-500 flex items-center gap-1 font-mono"><span class="material-symbols-outlined text-[13px] text-stone-400">schedule</span> 3j restants</span></div><h3 class="font-bold text-base text-stone-900 mt-0.5">Programmation Python &amp; Algorithmes d'optimisation</h3></div><button class="text-stone-400 hover:text-stone-700 p-1 rounded hover:bg-stone-100 transition-colors" onclick="const el = document.getElementById('tp5-content-body'); el.classList.toggle('hidden'); const ic = this.querySelector('span'); ic.textContent = el.classList.contains('hidden') ? 'keyboard_arrow_down' : 'keyboard_arrow_up';" title="Replier / Déplier le livrable"><span class="material-symbols-outlined text-[18px]">keyboard_arrow_up</span></button><button class="text-stone-400 hover:text-stone-700 p-1 rounded hover:bg-stone-100 transition-colors"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div><div class="bg-white rounded-xl border border-stone-200/70 p-3.5 flex flex-col gap-2.5" id="tp5-content-body"><div class="flex items-center justify-between pb-1.5 border-b border-stone-100"><span class="text-[11px] font-mono uppercase tracking-wider font-semibold text-stone-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px] text-orange-600">checklist</span> Exercices du livrable</span><span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200" id="cs-counter">3/5 complétés (60%)</span></div><div class="flex flex-col gap-1" id="cs-checklist"><label class="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-stone-50 cursor-pointer transition-colors select-none"><input checked="" class="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer accent-orange-600" onchange="toggleTask(this, 'cs')" type="checkbox"><span class="text-xs text-stone-400 line-through flex-1 transition-all">Exercice 1 : Manipulation des tenseurs et matrices NumPy</span><span class="text-[11px] font-mono text-emerald-600 font-medium">Validé</span></label><label class="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-stone-50 cursor-pointer transition-colors select-none"><input checked="" class="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer accent-orange-600" onchange="toggleTask(this, 'cs')" type="checkbox"><span class="text-xs text-stone-400 line-through flex-1 transition-all">Exercice 2 : Implémentation du gradient descendant vectorisé</span><span class="text-[11px] font-mono text-emerald-600 font-medium">Validé</span></label><label class="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-stone-50 cursor-pointer transition-colors select-none"><input checked="" class="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer accent-orange-600" onchange="toggleTask(this, 'cs')" type="checkbox"><span class="text-xs text-stone-400 line-through flex-1 transition-all">Exercice 3 : Seam Carving — Algorithme de coût d'énergie cumulée</span><span class="text-[11px] font-mono text-emerald-600 font-medium">Validé</span></label><label class="flex items-center gap-2.5 p-1.5 rounded-lg bg-amber-50/70 hover:bg-amber-50 border border-amber-100 cursor-pointer transition-colors select-none"><input class="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer accent-orange-600" onchange="toggleTask(this, 'cs')" type="checkbox"><span class="text-xs text-stone-800 font-semibold flex-1 transition-all">Exercice 4 : Optimisation dynamique et suppression verticale</span><span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-200/60 text-amber-900 font-semibold">En cours</span></label><label class="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-stone-50 cursor-pointer transition-colors select-none"><input class="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer accent-orange-600" onchange="toggleTask(this, 'cs')" type="checkbox"><span class="text-xs text-stone-600 flex-1 transition-all">Exercice 5 : Benchmark de calculs &amp; export du notebook .ipynb</span><span class="text-[10px] font-mono text-stone-400">À faire</span></label></div><div class="flex items-center justify-between pt-1"><button class="text-xs text-stone-500 hover:text-orange-600 flex items-center gap-1 transition-colors font-medium" onclick="addExercisePrompt('cs-checklist', 'cs')"><span class="material-symbols-outlined text-[16px]">add</span> Ajouter un exercice</button><span class="text-[11px] text-stone-400 font-mono">Dernière modif : il y a 2h</span></div></div></div><div class="flex flex-col gap-1.5"><span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-stone-400 px-1">Autres modules &amp; Historique</span><div class="grid grid-cols-1 sm:grid-cols-3 gap-2"><div class="p-2.5 rounded-xl bg-stone-50/80 border border-stone-200/80 hover:bg-white hover:border-emerald-300 transition-all flex flex-col justify-between border-l-4 border-l-emerald-500"><div class="flex items-center justify-between"><span class="text-[10px] font-mono font-bold text-emerald-700">Validé</span><span class="text-[10px] font-mono text-stone-500">Note: 18.5</span></div><h4 class="text-xs font-semibold text-stone-800 mt-1 truncate">TP 4 : Complément Python</h4></div><div class="p-2.5 rounded-xl bg-stone-50/80 border border-stone-200/80 hover:bg-white hover:border-emerald-300 transition-all flex flex-col justify-between border-l-4 border-l-emerald-500"><div class="flex items-center justify-between"><span class="text-[10px] font-mono font-bold text-emerald-700">Rendu</span><span class="text-[10px] font-mono text-stone-500">5/5 livrables</span></div><h4 class="text-xs font-semibold text-stone-800 mt-1 truncate">Projet : Seam Carving</h4></div><div class="p-2.5 rounded-xl bg-stone-50/80 border border-stone-200/80 hover:bg-white hover:border-stone-300 transition-all flex flex-col justify-between border-l-4 border-l-stone-300"><div class="flex items-center justify-between"><span class="text-[10px] font-mono text-stone-500">À venir</span><span class="text-[10px] font-mono text-stone-400">2 Mai</span></div><h4 class="text-xs font-semibold text-stone-600 mt-1 truncate">TP 6 : Réseaux Neurones</h4></div></div></div></div>
+<!-- Carte TP Principal Ouvert : TP 5 Programmation Python (Checklist interactive demandée) -->
+
+<!-- Historique des autres modules du cours (Style Trello cartes compactes) -->
+
+</section>
+<!-- COURS 2 : MÉCANIQUE DES MATÉRIAUX (Accent Bleu Foncé) -->
+<section class="course-card rounded-2xl bg-white border border-outline-warm p-5 shadow-card flex flex-col gap-4 transition-all hover:shadow-elevated" data-course="meca"><div class="flex items-center justify-between pb-3 border-b border-stone-100"><div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-[#1E40AF] ring-4 ring-blue-100"></span><div><h2 class="font-bold text-lg text-stone-900 tracking-tight">Mécanique des matériaux</h2></div></div><div class="flex items-center gap-3"><div class="text-right"><span class="font-mono text-xs font-semibold text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md">60% achevé</span><span class="block text-[11px] text-stone-500 font-mono mt-0.5">3 / 5 TPs validés</span></div><button class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors" title="Ajouter un TP"><span class="material-symbols-outlined text-[20px]">add_circle</span></button><button id="toggle-meca-btn" onclick="toggleCourseCollapse('meca')" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all" title="Replier / Déplier le cours"><span id="toggle-meca-icon" class="material-symbols-outlined text-[20px] transition-transform duration-200">keyboard_arrow_up</span></button></div></div><div id="course-meca-body" class="flex flex-col gap-4 transition-all duration-300"><div class="w-full h-1.5 rounded-full bg-stone-100 overflow-hidden"><div class="h-full bg-gradient-to-r from-blue-700 to-indigo-500 rounded-full transition-all duration-500" style="width: 60%;"></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3.5"><div class="rounded-xl bg-[#F8FAFC] border border-blue-200/80 p-3.5 flex flex-col justify-between gap-3 shadow-xs relative overflow-hidden border-l-4 border-l-[#1E40AF]"><div class="flex flex-col gap-2"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">Devoir Maison 2</span><span class="text-[11px] text-amber-700 font-mono font-medium">J-2</span></div><button class="w-6 h-6 flex items-center justify-center rounded text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 transition-colors" onclick="const el = document.getElementById('dm2-body-content'); el.classList.toggle('hidden'); const ic = this.querySelector('span'); ic.textContent = el.classList.contains('hidden') ? 'keyboard_arrow_down' : 'keyboard_arrow_up';" title="Replier / Déplier"><span class="material-symbols-outlined text-[16px]">keyboard_arrow_up</span></button></div><h3 class="font-bold text-sm text-stone-900 leading-snug">Calcul des contraintes de cisaillement</h3><div class="flex flex-col gap-1.5 pt-1" id="dm2-body-content"><label class="flex items-center gap-2 text-xs cursor-pointer select-none"><input checked="" class="w-3.5 h-3.5 rounded border-stone-300 text-blue-700 accent-blue-700 focus:ring-0" onchange="toggleTask(this, 'meca')" type="checkbox"><span class="line-through text-stone-400">Q1 : Torseur de cohésion</span></label><label class="flex items-center gap-2 text-xs cursor-pointer select-none"><input class="w-3.5 h-3.5 rounded border-stone-300 text-blue-700 accent-blue-700 focus:ring-0" onchange="toggleTask(this, 'meca')" type="checkbox"><span class="text-stone-700 font-medium">Q2 : Moment statique maximal</span></label><label class="flex items-center gap-2 text-xs cursor-pointer select-none"><input class="w-3.5 h-3.5 rounded border-stone-300 text-blue-700 accent-blue-700 focus:ring-0" onchange="toggleTask(this, 'meca')" type="checkbox"><span class="text-stone-700 font-medium">Q3 : Modélisation ANSYS</span></label></div></div><div class="flex items-center justify-between pt-2 border-t border-slate-200"><span class="text-[11px] font-mono text-blue-800 bg-blue-50 px-2 py-0.5 rounded" id="meca-counter">1/3 terminé</span><span class="text-[11px] text-stone-500 font-mono">Livrable PDF</span></div></div><div class="rounded-xl bg-[#F0FDF4]/60 border border-emerald-200/80 p-3.5 flex flex-col justify-between gap-3 shadow-xs relative overflow-hidden border-l-4 border-l-emerald-500"><div class="flex flex-col gap-2"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">check_circle</span> TP 8 : Validé</span><span class="text-[11px] font-mono text-emerald-700 font-bold">100%</span></div><button class="w-6 h-6 flex items-center justify-center rounded text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 transition-colors" onclick="const el = document.getElementById('tp8-details-content'); el.classList.toggle('hidden'); const ic = this.querySelector('span'); ic.textContent = el.classList.contains('hidden') ? 'keyboard_arrow_down' : 'keyboard_arrow_up';" title="Replier / Déplier"><span class="material-symbols-outlined text-[16px]">keyboard_arrow_up</span></button></div><h3 class="font-bold text-sm text-stone-900 leading-snug">TP 8 : Flexion &amp; Déformation Élastique</h3><p class="text-xs text-stone-500">Mesures comparateurs numériques et banc hydraulique.</p><div class="flex flex-col gap-1 pt-1" id="tp8-details-content"><div class="flex items-center gap-1.5 text-xs text-stone-500 line-through"><span class="material-symbols-outlined text-emerald-600 text-[14px]">check</span><span>Essai poutre aluminium</span></div><div class="flex items-center gap-1.5 text-xs text-stone-500 line-through"><span class="material-symbols-outlined text-emerald-600 text-[14px]">check</span><span>Rapport complet rendu</span></div></div></div><div class="flex items-center justify-between pt-2 border-t border-emerald-100"><span class="text-[11px] font-mono text-emerald-800 font-bold">Note : 16.0 / 20</span><span class="text-[11px] text-stone-500 flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">attachment</span> Rapport.pdf</span></div></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1"><div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200/70 flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-emerald-600 text-[17px]">verified</span><span class="text-xs font-medium text-stone-800">TP 7 : Inertes &amp; moments</span></div><span class="text-[11px] font-mono font-bold text-emerald-700">17.0</span></div><div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200/70 flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-stone-400 text-[17px]">pending_actions</span><span class="text-xs font-medium text-stone-500">TP 9 : Torsion &amp; flambement</span></div><span class="text-[11px] font-mono text-stone-400">Mai</span></div></div></div></section>
+<!-- COURS 3 : MATHÉMATIQUES APPLIQUÉES (Accent Vert) -->
+<section class="course-card rounded-2xl bg-white border border-outline-warm p-5 shadow-card flex flex-col gap-4 transition-all hover:shadow-elevated" data-course="maths"><div class="flex items-center justify-between pb-3 border-b border-stone-100"><div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-[#10B981] ring-4 ring-emerald-100"></span><div><h2 class="font-bold text-lg text-stone-900 tracking-tight">Mathématiques appliquées</h2><span class="text-xs text-stone-500">UE Maths 202 • Dr. Fontaine</span></div></div><div class="flex items-center gap-3"><div class="text-right"><span class="font-mono text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">100% à jour</span><span class="block text-[11px] text-stone-500 font-mono mt-0.5">3 / 3 TPs achevés</span></div><button class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors" title="Ajouter un TP"><span class="material-symbols-outlined text-[20px]">add_circle</span></button><button id="toggle-maths-btn" onclick="toggleCourseCollapse('maths')" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all" title="Replier / Déplier le cours"><span id="toggle-maths-icon" class="material-symbols-outlined text-[20px] transition-transform duration-200">keyboard_arrow_up</span></button></div></div><div id="course-maths-body" class="flex flex-col gap-4 transition-all duration-300"><div class="w-full h-1.5 rounded-full bg-stone-100 overflow-hidden"><div class="h-full bg-gradient-to-r from-emerald-600 to-teal-500 rounded-full" style="width: 100%;"></div></div><div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"><div class="p-3 rounded-xl bg-stone-50 border border-stone-200/70 border-l-4 border-l-emerald-500 flex flex-col justify-between gap-2"><span class="text-[10px] font-mono text-emerald-700 font-bold">18/20</span><span class="text-xs font-semibold text-stone-800">TP 1 : Résolution matricielle</span><span class="text-[10px] text-stone-500">Python Scipy</span></div><div class="p-3 rounded-xl bg-stone-50 border border-stone-200/70 border-l-4 border-l-emerald-500 flex flex-col justify-between gap-2"><span class="text-[10px] font-mono text-emerald-700 font-bold">19.5/20</span><span class="text-xs font-semibold text-stone-800">TP 2 : Équations diff. Runge-Kutta</span><span class="text-[10px] text-stone-500">Modèle RK4</span></div><div class="p-3 rounded-xl bg-stone-50 border border-stone-200/70 border-l-4 border-l-emerald-500 flex flex-col justify-between gap-2"><span class="text-[10px] font-mono text-emerald-700 font-bold">Validé</span><span class="text-xs font-semibold text-stone-800">TP 3 : Transformée de Fourier</span><span class="text-[10px] text-stone-500">FFT audio</span></div></div></div></section>
+<!-- COURS 4 : PHYSIQUE & ÉLECTRONIQUE (Accent Rose) -->
+<section class="course-card rounded-2xl bg-white border border-outline-warm p-5 shadow-card flex flex-col gap-4 transition-all hover:shadow-elevated" data-course="phys"><div class="flex items-center justify-between pb-3 border-b border-stone-100"><div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full bg-[#EC4899] ring-4 ring-pink-100"></span><div><h2 class="font-bold text-lg text-stone-900 tracking-tight">Physique &amp; Électronique</h2><span class="text-xs text-stone-500">UE Phys 208 • Prof. Lemoine</span></div></div><div class="flex items-center gap-3"><div class="text-right"><span class="font-mono text-xs font-semibold text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md">50% en cours</span><span class="block text-[11px] text-stone-500 font-mono mt-0.5">2 / 4 TPs préparés</span></div><button class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors" title="Ajouter un TP"><span class="material-symbols-outlined text-[20px]">add_circle</span></button><button id="toggle-phys-btn" onclick="toggleCourseCollapse('phys')" class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all" title="Replier / Déplier le cours"><span id="toggle-phys-icon" class="material-symbols-outlined text-[20px] transition-transform duration-200">keyboard_arrow_up</span></button></div></div><div id="course-phys-body" class="flex flex-col gap-4 transition-all duration-300"><div class="w-full h-1.5 rounded-full bg-stone-100 overflow-hidden"><div class="h-full bg-gradient-to-r from-pink-500 to-rose-400 rounded-full" style="width: 50%;"></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"><div class="p-3 rounded-xl bg-pink-50/40 border border-pink-200/70 border-l-4 border-l-[#EC4899] flex flex-col justify-between gap-1.5"><div class="flex items-center justify-between"><span class="text-[10px] font-mono px-2 py-0.5 rounded bg-pink-100 text-pink-800 font-bold">En préparation</span><span class="text-[10px] font-mono text-pink-700 font-bold">Demain 14h</span></div><h4 class="text-xs font-semibold text-stone-800">TP Oscilloscope &amp; Filtres RLC</h4><span class="text-[11px] text-stone-500">Banc de mesure salle E-104</span></div><div class="p-3 rounded-xl bg-stone-50 border border-stone-200/70 border-l-4 border-l-emerald-500 flex flex-col justify-between gap-1.5"><div class="flex items-center justify-between"><span class="text-[10px] font-mono text-emerald-700 font-bold">Validé</span><span class="text-[10px] font-mono text-stone-500">Note: 16.5</span></div><h4 class="text-xs font-semibold text-stone-800">TP Optique Ondulatoire</h4><span class="text-[11px] text-stone-500">Interférences de Young</span></div></div></div></section>
+</div>
+</div>
+</main>
+</div>
+<!-- NOUVELLE FONCTIONNALITÉ : MODAL / VOLET "AJOUTER UN COURS" AVEC SÉLECTEUR DE COULEURS ÉTENDU -->
+<div class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity hidden" id="course-modal">
+<div class="bg-white rounded-2xl border border-outline-warm shadow-popover max-w-lg w-full p-6 flex flex-col gap-5 transform transition-all animate-in fade-in zoom-in-95 duration-200" onclick="event.stopPropagation()">
+<!-- Titre et fermeture -->
+<div class="flex items-center justify-between pb-3 border-b border-stone-100">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">library_add</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-stone-900 tracking-tight">Ajouter un nouveau cours</h3>
+<p class="text-xs text-stone-500">Créez un module d'enseignement pour votre semestre</p>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition-colors" onclick="toggleCourseModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Formulaire -->
+<form class="flex flex-col gap-4" onsubmit="handleCreateCourse(event)">
+<!-- Nom du Cours -->
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-stone-700" for="course-name">Intitulé du cours *</label>
+<input class="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none text-stone-900 placeholder:text-stone-400" id="course-name" placeholder="ex: Thermodynamique appliquée, Droit du numérique..." required="" type="text">
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-stone-700" for="course-code">Code UE / Référence</label>
+<input class="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none text-stone-900 placeholder:text-stone-400" id="course-code" placeholder="ex: UE THERMO 402" type="text">
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-stone-700" for="course-teacher">Enseignant référent</label>
+<input class="w-full px-3.5 py-2 text-sm rounded-xl border border-stone-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none text-stone-900 placeholder:text-stone-400" id="course-teacher" placeholder="ex: Prof. Dubois" type="text">
+</div>
+</div>
+<!-- SÉLECTEUR DE COULEURS ÉTENDU (Rouge, Orange, Jaune, Vert, Bleu clair, Bleu foncé, Gris, Rose) -->
+<div class="flex flex-col gap-2 pt-1">
+<div class="flex items-center justify-between">
+<label class="text-xs font-semibold text-stone-700">Couleur d'identification visuelle</label>
+<span class="text-[11px] font-mono text-stone-500" id="selected-color-label">Orange (#F97316)</span>
+</div>
+<div class="grid grid-cols-8 gap-2 p-2 bg-[#FBF8F3] rounded-xl border border-outline-warm" id="color-palette">
+<!-- 1. Rouge -->
+<button class="color-choice-btn group flex flex-col items-center justify-center p-1.5 rounded-lg hover:scale-110 transition-transform relative" onclick="selectColor('#EF4444', 'Rouge', this)" title="Rouge" type="button">
+<span class="w-6 h-6 rounded-full bg-[#EF4444] shadow-xs flex items-center justify-center"></span>
+</button>
+<!-- 2. Orange (Sélectionné par défaut) -->
+<button class="color-choice-btn group flex flex-col items-center justify-center p-1.5 rounded-lg hover:scale-110 transition-transform relative ring-2 ring-orange-600 ring-offset-2" onclick="selectColor('#F97316', 'Orange', this)" title="Orange" type="button">
+<span class="w-6 h-6 rounded-full bg-[#F97316] shadow-xs flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[15px]">check</span>
+</span>
+</button>
+<!-- 3. Jaune -->
+<button class="color-choice-btn group flex flex-col items-center justify-center p-1.5 rounded-lg hover:scale-110 transition-transform relative" onclick="selectColor('#EAB308', 'Jaune', this)" title="Jaune" type="button">
+<span class="w-6 h-6 rounded-full bg-[#EAB308] shadow-xs flex items-center justify-center"></span>
+</button>
+<!-- 4. Vert -->
+<button class="color-choice-btn group flex flex-col items-center justify-center p-1.5 rounded-lg hover:scale-110 transition-transform relative" onclick="selectColor('#10B981', 'Vert', this)" title="Vert" type="button">
+<span class="w-6 h-6 rounded-full bg-[#10B981] shadow-xs flex items-center justify-center"></span>
+</button>
+<!-- 5. Bleu clair -->
+<button class="color-choice-btn group flex flex-col items-center justify-center p-1.5 rounded-lg hover:scale-110 transition-transform relative" onclick="selectColor('#0EA5E9', 'Bleu clair', this)" title="Bleu clair" type="button">
+<span class="w-6 h-6 rounded-full bg-[#0EA5E9] shadow-xs flex items-center justify-center"></span>
+</button>
+<!-- 6. Bleu foncé -->
+<button class="color-choice-btn group flex flex-col items-center justify-center p-1.5 rounded-lg hover:scale-110 transition-transform relative" onclick="selectColor('#1E40AF', 'Bleu foncé', this)" title="Bleu foncé" type="button">
+<span class="w-6 h-6 rounded-full bg-[#1E40AF] shadow-xs flex items-center justify-center"></span>
+</button>
+<!-- 7. Gris -->
+<button class="color-choice-btn group flex flex-col items-center justify-center p-1.5 rounded-lg hover:scale-110 transition-transform relative" onclick="selectColor('#64748B', 'Gris', this)" title="Gris" type="button">
+<span class="w-6 h-6 rounded-full bg-[#64748B] shadow-xs flex items-center justify-center"></span>
+</button>
+<!-- 8. Rose -->
+<button class="color-choice-btn group flex flex-col items-center justify-center p-1.5 rounded-lg hover:scale-110 transition-transform relative" onclick="selectColor('#EC4899', 'Rose', this)" title="Rose" type="button">
+<span class="w-6 h-6 rounded-full bg-[#EC4899] shadow-xs flex items-center justify-center"></span>
+</button>
+</div>
+</div>
+<!-- Boutons d'action -->
+<div class="flex items-center justify-end gap-2.5 pt-3 border-t border-stone-100 mt-2">
+<button class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:bg-stone-100 transition-colors" onclick="toggleCourseModal()" type="button">
+            Annuler
+          </button>
+<button class="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-orange-600 hover:bg-orange-700 text-white shadow-sm transition-all active:scale-[0.98]" type="submit">
+            Enregistrer le cours
+          </button>
+</div>
+</form>
+</div>
+</div>
+<!-- Scripts Logiques & Interactions -->
+<script>
+    let currentColor = '#F97316';
+    let currentColorName = 'Orange';
+
+    function toggleCourseModal() {
+      const modal = document.getElementById('course-modal');
+      modal.classList.toggle('hidden');
+    }
+
+    function selectColor(hex, name, buttonEl) {
+      currentColor = hex;
+      currentColorName = name;
+      document.getElementById('selected-color-label').textContent = `${name} (${hex})`;
+
+      // Retirer la coche et l'anneau des autres boutons
+      document.querySelectorAll('.color-choice-btn').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-orange-600', 'ring-offset-2');
+        const inner = btn.querySelector('span');
+        inner.innerHTML = '';
+      });
+
+      // Appliquer au bouton cliqué
+      buttonEl.classList.add('ring-2', 'ring-orange-600', 'ring-offset-2');
+      const innerSpan = buttonEl.querySelector('span');
+      innerSpan.innerHTML = '<span class="material-symbols-outlined text-white text-[15px]">check</span>';
+    }
+
+    function handleCreateCourse(e) {
+      e.preventDefault();
+      const courseName = document.getElementById('course-name').value.trim();
+      const courseCode = document.getElementById('course-code').value.trim() || 'UE GEN 101';
+      const teacher = document.getElementById('course-teacher').value.trim() || 'Enseignant';
+
+      if (!courseName) return;
+
+      // 1. Ajouter dans la barre latérale
+      const sidebarList = document.getElementById('sidebar-courses-list');
+      const newSidebarItem = document.createElement('a');
+      newSidebarItem.className = 'flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/80 text-on-surface-variant hover:text-on-surface transition-all group';
+      newSidebarItem.href = '#';
+      newSidebarItem.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${currentColor}"></span>
+          <span class="text-xs font-medium truncate max-w-[125px] group-hover:font-semibold">${courseName}</span>
+        </div>
+        <span class="text-[11px] font-mono text-on-surface-muted bg-stone-100 px-1.5 py-0.5 rounded">0 TP</span>
+      `;
+      sidebarList.appendChild(newSidebarItem);
+
+      // Mettre à jour le compteur du sidebar
+      const countEl = document.getElementById('sidebar-course-count');
+      countEl.textContent = parseInt(countEl.textContent) + 1;
+
+      // 2. Ajouter une nouvelle section de cours sur la page
+      const container = document.getElementById('courses-container');
+      const newCard = document.createElement('section');
+      newCard.className = 'course-card rounded-2xl bg-white border border-outline-warm p-5 shadow-card flex flex-col gap-4 transition-all hover:shadow-elevated';
+      newCard.setAttribute('data-course', 'custom-' + Date.now());
+      newCard.innerHTML = `
+        <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3.5 h-3.5 rounded-full" style="background-color: ${currentColor}"></span>
+            <div>
+              <h2 class="font-bold text-lg text-stone-900 tracking-tight">${courseName}</h2>
+              <span class="text-xs text-stone-500">${courseCode} • ${teacher}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded-md" style="background-color: ${currentColor}15; color: ${currentColor}">Nouveau</span>
+              <span class="block text-[11px] text-stone-500 font-mono mt-0.5">0 TP configuré</span>
+            </div>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors" title="Ajouter un TP">
+              <span class="material-symbols-outlined text-[20px]">add_circle</span>
+            </button>
+          </div>
+        </div>
+        <div class="w-full h-1.5 rounded-full bg-stone-100 overflow-hidden">
+          <div class="h-full rounded-full" style="width: 0%; background-color: ${currentColor}"></div>
+        </div>
+        <div class="p-6 rounded-xl border border-dashed border-stone-300 flex flex-col items-center justify-center text-center gap-2">
+          <span class="material-symbols-outlined text-[28px] text-stone-400">post_add</span>
+          <p class="text-xs font-semibold text-stone-700">Aucun devoir ou TP pour le moment</p>
+          <p class="text-[11px] text-stone-500 max-w-xs">Commencez par ajouter une première séance ou un projet à rendre.</p>
+          <button class="mt-1 text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style="background-color: ${currentColor}">
+            + Créer un TP
+          </button>
+        </div>
+      `;
+      container.prepend(newCard);
+
+      // Fermer le modal et réinitialiser
+      toggleCourseModal();
+      document.getElementById('course-name').value = '';
+      document.getElementById('course-code').value = '';
+      document.getElementById('course-teacher').value = '';
+    }
+
+    function toggleTask(checkbox, courseKey) {
+      const textSpan = checkbox.nextElementSibling;
+      if (checkbox.checked) {
+        textSpan.classList.add('line-through', 'text-stone-400');
+        textSpan.classList.remove('text-stone-800', 'font-semibold', 'text-stone-700', 'font-medium');
+      } else {
+        textSpan.classList.remove('line-through', 'text-stone-400');
+        textSpan.classList.add('text-stone-800', 'font-semibold');
+      }
+      updateCounter(courseKey);
+    }
+
+    function updateCounter(courseKey) {
+      if (courseKey === 'cs') {
+        const list = document.getElementById('cs-checklist');
+        if (!list) return;
+        const total = list.querySelectorAll('input[type="checkbox"]').length;
+        const checked = list.querySelectorAll('input[type="checkbox"]:checked').length;
+        const pct = Math.round((checked / total) * 100);
+        const counterEl = document.getElementById('cs-counter');
+        if (counterEl) {
+          counterEl.textContent = `${checked}/${total} complétés (${pct}%)`;
+          if (pct === 100) {
+            counterEl.className = 'text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300';
+          } else {
+            counterEl.className = 'text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200';
+          }
+        }
+      } else if (courseKey === 'meca') {
+        const list = document.getElementById('meca-checklist');
+        if (!list) return;
+        const total = list.querySelectorAll('input[type="checkbox"]').length;
+        const checked = list.querySelectorAll('input[type="checkbox"]:checked').length;
+        const counterEl = document.getElementById('meca-counter');
+        if (counterEl) {
+          counterEl.textContent = `${checked}/${total} terminé${checked > 1 ? 's' : ''}`;
+        }
+      }
+    }
+
+    function addExercisePrompt(listId, courseKey) {
+      const list = document.getElementById(listId);
+      if (!list) return;
+      const count = list.querySelectorAll('label').length + 1;
+      const taskName = prompt("Intitulé du nouvel exercice :", "Exercice " + count + " : ");
+      if (!taskName) return;
+
+      const label = document.createElement('label');
+      label.className = 'flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-stone-50 cursor-pointer transition-colors select-none';
+      label.innerHTML = `
+        <input type="checkbox" onchange="toggleTask(this, '${courseKey}')" class="w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer accent-orange-600">
+        <span class="text-xs text-stone-800 font-semibold flex-1 transition-all">${taskName}</span>
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-stone-100 text-stone-600">Nouveau</span>
+      `;
+      list.appendChild(label);
+      updateCounter(courseKey);
+    }
+
+    function filterCourses(filterKey, btnElement) {
+      const buttons = document.querySelectorAll('.course-filter-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-[#FFF3E8]', 'text-orange-700', 'shadow-2xs', 'font-semibold');
+        btn.classList.add('text-stone-600', 'font-medium');
+      });
+      btnElement.classList.remove('text-stone-600', 'font-medium');
+      btnElement.classList.add('bg-[#FFF3E8]', 'text-orange-700', 'shadow-2xs', 'font-semibold');
+
+      const cards = document.querySelectorAll('.course-card');
+      cards.forEach(card => {
+        if (filterKey === 'all') {
+          card.style.display = 'flex';
+        } else {
+          if (card.getAttribute('data-course') === filterKey) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        }
+      });
+    }
+  </script>
+
+
+<script>function toggleCourseCollapse(courseKey){const body=document.getElementById(`course-${courseKey}-body`);const icon=document.getElementById(`toggle-${courseKey}-icon`);if(!body)return;if(body.classList.contains('hidden')){body.classList.remove('hidden');if(icon){icon.textContent='keyboard_arrow_up';icon.classList.remove('rotate-180');}}else{body.classList.add('hidden');if(icon){icon.textContent='keyboard_arrow_down';icon.classList.add('rotate-180');}}}</script></body></html>
